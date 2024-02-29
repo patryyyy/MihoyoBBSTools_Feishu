@@ -22,7 +22,23 @@
 
 ## push.ini配置教程
 
-* push_server 可选范围 cqhttp ftqq(sever酱) pushplus telegram dingrobot bark
+* push_server 可选范围 cqhttp ftqq(sever酱) pushplus telegram dingrobot bark feishubot，默认为**feishubot**
+
+### feishubot
+
+飞书
+
+`webhook`填写**Webhook 地址**
+
+如果你打开了签名校验，则在`sign`中填写**密钥**
+
+填写示例：
+
+```
+[feishubot]
+webhook=https://open.feishu.cn/open-apis/bot/v2/hook/XXX
+sign=xxxxxxxxxxxxxxxxxxxxxx
+```
 
 ### Wecom
 

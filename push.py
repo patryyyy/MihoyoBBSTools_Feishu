@@ -1,5 +1,6 @@
 import os
 import hmac
+import subprocess
 import time
 import base64
 import config
@@ -178,15 +179,43 @@ def dingrobot(send_title, push_message):
 
 # 飞书机器人
 def feishubot(send_title, push_message):
-    api_url = cfg.get('feishubot', 'webhook')  # https://open.feishu.cn/open-apis/bot/v2/hook/XXX
-    rep = http.post(
-        url=api_url,
-        headers={"Content-Type": "application/json; charset=utf-8"},
-        json={
-            "msg_type": "text", "content": {"text": send_title + "\r\n" + push_message}
-        }
-    ).json()
-    log.info(f"推送结果：{rep.get('msg')}")
+    # 获取webhook和签名
+    webhook = cfg.get('feishubot', 'webhook') # https://open.feishu.cn/open-apis/bot/v2/hook/XXX
+    sign = cfg.get('feishubot', 'sign')
+
+    if webhook == '' or webhook == None:
+        raise Exception('飞书推送错误: webhook地址为空，请检查配置文件')
+
+    # 创建管道
+    fifo_path = '/tmp/communicate_with_feishu_push'
+    try:
+        if os.path.exists(fifo_path):
+            os.remove(fifo_path);
+        os.mkfifo(fifo_path)
+    except :
+        raise Exception('飞书推送错误: 管道创建失败')
+
+    # 启动进程
+    try:
+        if sign == '' or sign == None:
+            subprocess.Popen(['./feishu_push', '-w', webhook, f'message_card:{send_title},{push_message}'])
+        else:
+            subprocess.Popen(['./feishu_push', '-w', webhook, '-s', sign, f'message_card:{send_title},{push_message}'])
+    except:
+        os.remove(fifo_path)
+        raise Exception('飞书推送错误: feishu_push启动失败')
+
+    # 从管道中读取消息
+    try:
+        with open(fifo_path, "r") as fifo_read:
+            message_from_feishu_push = fifo_read.readline().strip()
+        
+        os.remove(fifo_path)
+    except:
+        os.remove(fifo_path)
+        raise Exception('飞书推送错误: 无法读取feishu_push message')
+
+    log.info(f"推送结果：{message_from_feishu_push}")
 
 
 # Bark
