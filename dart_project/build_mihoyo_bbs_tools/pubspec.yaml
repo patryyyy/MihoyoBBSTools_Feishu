@@ -1,0 +1,14 @@
+name: build_mihoyo_bbs_tools
+description: build_mihoyo_bbs_tools
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0'
+
+dependencies:
+  logger: ^2.0.2+1
+  path: ^1.9.0
+  system: ^1.0.0
+
+dev_dependencies:
+  lints: ^3.0.0
